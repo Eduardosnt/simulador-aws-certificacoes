@@ -39,7 +39,7 @@
         .option-selected { border-color: #FF9900 !important; background-color: #FFF6EA !important; border-width: 2px !important; }
     </style>
 </head>
-<body class="text-gray-800 font-sans h-screen flex flex-col">
+<body class="text-gray-800 font-sans h-screen flex flex-col" oncontextmenu="return false;">
 
     <header class="bg-aws-blue text-white shadow-md py-4 px-6 flex justify-between items-center shrink-0">
         <div class="flex items-center gap-3">
@@ -166,6 +166,45 @@
     </main>
 
     <script>
+        // --- PROTEÇÃO ANTI-INSPECIONAR E ANTI-TRAPAÇA ---
+        
+        // 1. Bloqueia atalhos de teclado conhecidos para abrir o DevTools
+        document.addEventListener('keydown', function(e) {
+            // Bloqueia F12
+            if (e.key === 'F12' || e.keyCode === 123) {
+                e.preventDefault();
+                return false;
+            }
+            // Bloqueia Ctrl+Shift+I (Inspecionar), Ctrl+Shift+J (Console), Ctrl+Shift+C (Selecionar)
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C' || e.key === 'i' || e.key === 'j' || e.key === 'c')) {
+                e.preventDefault();
+                return false;
+            }
+            // Bloqueia Ctrl+U (Ver código-fonte)
+            if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // 2. Armadilha de Debugger (Trava o Inspecionar se for aberto à força)
+        setInterval(function() {
+            const start = new Date().getTime();
+            debugger; // Se o Inspecionar estiver aberto, o navegador vai pausar nesta linha
+            const end = new Date().getTime();
+            
+            // Se demorou mais de 100ms para passar do debugger, significa que a ferramenta de desenvolvedor está aberta.
+            if (end - start > 100) {
+                document.body.innerHTML = `
+                    <div style="display:flex; height:100vh; align-items:center; justify-content:center; background-color:#232F3E; color:white; flex-direction:column;">
+                        <i class="fas fa-shield-alt text-6xl mb-4 text-aws-orange"></i>
+                        <h1 class="text-3xl font-bold">Acesso não autorizado</h1>
+                        <p class="mt-2 text-gray-400">Por favor, feche as ferramentas de desenvolvedor para continuar o simulado.</p>
+                    </div>`;
+            }
+        }, 1000);
+
+
         // BANCO DE DADOS DE QUESTÕES COM QUESTIONS DE PROVA E SIMULADOS REALISTAS
         const questionBank = {
             'AIF': [
